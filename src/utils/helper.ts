@@ -45,9 +45,11 @@ export const imageMatrix = [
     ],
 ]
 
-export function updatePathInBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>) {
+export function updatePathInBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>> , whosTurn:string) {
     const extractedPieceName = findPiece(matrix[row][col])
-    const possibelPathArray = findPosibilePosition(extractedPieceName, row, col, setMatrix, matrix);
+    if((extractedPieceName.includes("black") && whosTurn == "black" ) || (extractedPieceName.includes("white")&& whosTurn == "white") ){
+        const possibelPathArray = findPosibilePosition(extractedPieceName, row, col, setMatrix, matrix , whosTurn );
+   
     setPiece((clickedPiece) => {
         clickedPiece = [row, col]
         return clickedPiece
@@ -62,13 +64,26 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
     });
     return possibelPathArray
 }
+}
 
-export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>) {
+export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string , setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>) {
     if (referenceVal) {
         referenceVal.map((move) => {
             if (row == move[0] && col == move[1]) {
                 matrix[row][col] = matrix[piece[0]][piece[1]]
                 matrix[piece[0]][piece[1]] = ""
+                if(whosTurn == "white"){
+                    setWhosTurn("black");
+                }
+                else{
+                    setWhosTurn("white")
+                }
+                sethightlightValue((prevVal)=>{
+                    prevVal = []
+                    return prevVal;
+                })
+                
+            
             }
             // else{
             //     setWrongMove((prevMove)=>{
@@ -128,7 +143,7 @@ const findPiece = (piece: string) => {
     return pieceName;
 }
 
-const findPosibilePosition = (pieceName: string, row: number, col: number, setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, matrix: string[][]) => {
+const findPosibilePosition = (pieceName: string, row: number, col: number, setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, matrix: string[][] , whosTurn: string ) => {
     let possiblePaths: number[][] = []
     switch (pieceName) {
         case "black-pawn":
@@ -178,28 +193,32 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
                     possiblePaths.push(rightPossibleMove)
                 }
             }
-            possiblePaths = findIntersection(row, col, possiblePaths, matrix)
+            possiblePaths = removePathsOfSameTeam(row, col, possiblePaths, matrix)
             console.log("rookPossible Moves" , possiblePaths)
             break;
         case "black-bishop":
         case "white-bishop":
             for (let i: number = 1; i <= 8; i++) {
-                if (isValidMove(row - i, col - i) && isValidMove(row + i, col - i)) {
+                if (isValidMove(row - i, col - i) ) {
                     let leftUpper: number[] = [row - i, col - i]
-                    let leftLower: number[] = [row + i, col - i]
                     possiblePaths.push(leftUpper)
+                }
+                if (isValidMove(row + i, col - i)) {
+                    let leftLower: number[] = [row + i, col - i]
                     possiblePaths.push(leftLower)
                 }
             }
             for (let i: number = 1; i < 8; i++) {
-                if (isValidMove(row - i, col + i) && isValidMove(row + i, col + i)) {
-                    let rightUpper: number[] = [row - i, col + i]
+                if (isValidMove(row - i, col + i)) {
+                let rightUpper: number[] = [row - i, col + i]
+                possiblePaths.push(rightUpper)
+                }
+                if (isValidMove(row + i, col + i)) {
                     let rightLower: number[] = [row + i, col + i]
-                    possiblePaths.push(rightUpper)
                     possiblePaths.push(rightLower)
                 }
             }
-            // possiblePaths = findIntersection(row, col, possiblePaths, matrix)
+            possiblePaths = removePathsOfSameTeam(row, col, possiblePaths, matrix)
             break;
         case "black-queen":
         case "white-queen":
@@ -225,22 +244,27 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
                 }
             }
             for (let i: number = 1; i <= 8; i++) {
-                if (isValidMove(row - i, col - i) && isValidMove(row + i, col - i)) {
+                if (isValidMove(row - i, col - i) ) {
                     let leftUpper: number[] = [row - i, col - i]
-                    let leftLower: number[] = [row + i, col - i]
                     possiblePaths.push(leftUpper)
+                }
+                if (isValidMove(row + i, col - i)) {
+                    let leftLower: number[] = [row + i, col - i]
                     possiblePaths.push(leftLower)
                 }
             }
             for (let i: number = 1; i < 8; i++) {
-                if (isValidMove(row - i, col + i) && isValidMove(row + i, col + i)) {
-                    let rightUpper: number[] = [row - i, col + i]
+                if (isValidMove(row - i, col + i)) {
+                let rightUpper: number[] = [row - i, col + i]
+                possiblePaths.push(rightUpper)
+                }
+                if (isValidMove(row + i, col + i)) {
                     let rightLower: number[] = [row + i, col + i]
-                    possiblePaths.push(rightUpper)
                     possiblePaths.push(rightLower)
                 }
             }
-            // possiblePaths = findIntersection(row, col, possiblePaths, matrix)
+            
+            possiblePaths = removePathsOfSameTeam(row, col, possiblePaths, matrix)
             break;
         case "black-knight":
         case "white-knight":
@@ -257,7 +281,7 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
 
                 }
             }
-            possiblePaths = findIntersection(row, col, possiblePaths, matrix)
+            possiblePaths = removePathsOfSameTeam(row, col, possiblePaths, matrix)
             break;
         case "white-king":
         case "black-king":
@@ -284,18 +308,18 @@ const isValidMove = (row: number, col: number) => {
     }
 }
 
-const findIntersection = (row: number, col: number, possiblePaths: number[][], matrix: string[][]) => {
+const removePathsOfSameTeam = (row: number, col: number, possiblePaths: number[][], matrix: string[][]) => {
     let optimizedPaths: number[][] = possiblePaths
     possiblePaths.map((move: number[]) => {
         if (matrix[move[0]][move[1]] != '') {
             const clickedPiece: string = findPiece(matrix[row][col])
             const intersectingPiece: string = findPiece(matrix[move[0]][move[1]])
-            console.log("clickedPiece" , clickedPiece)
-            console.log("intersectingPiece", intersectingPiece);
             if ((intersectingPiece.includes("black") && clickedPiece.includes("black") || (intersectingPiece.includes("white") && clickedPiece.includes("white")))) {
-                optimizedPaths = optimizedPaths.filter(item => item[0] != move[0] && item[1] != move[1])
+                optimizedPaths = optimizedPaths.filter(item => item != move)
             }
-            console.log("optimizedPaths", optimizedPaths);
+            else if((intersectingPiece.includes("white") && clickedPiece.includes("black") || (intersectingPiece.includes("black") && clickedPiece.includes("white")))){
+                
+            }
         }
     })
     return optimizedPaths

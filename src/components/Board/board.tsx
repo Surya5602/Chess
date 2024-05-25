@@ -7,9 +7,10 @@ function board() {
   const [wrongMove , setWrongMove] = useState<number[]>([]);
   const [matrix, setMatrix] = useState<string[][]>(imageMatrix);
   const [hightlightValue , sethightlightValue] = useState<number[][]>([]);
-  useEffect((()=>
-    console.log(referenceVal)
-  ), [referenceVal])
+  const [whosTurn , setWhosTurn] = useState('white');
+  useEffect(()=>{
+    console.log(whosTurn)
+  },[whosTurn])
   return (
     <>
       <div className="board">
@@ -25,8 +26,8 @@ function board() {
                     className={`${(col + row) % 2 == 0 ? "yellowBox" : "greenBox"
                       } ${hightlightValue.findIndex((value)=> value[0] == row && value[1]==col) > -1 ? "possibleMove" : ""} ${ piece[0]==row && piece[1] == col && matrix[piece[0]][piece[1]] ? "clickedBox" : ""} ${wrongMove[0] == row && wrongMove[1] == col ? "wrongMove" : ""}`}
                     onClick={() => {
-                      updatePathInBoard(row, col, matrix, setMatrix, setPiece, sethightlightValue , setReferenceVal  );
-                      updateBoard(row, col, matrix, setMatrix, setReferenceVal, referenceVal , piece ,setPiece , wrongMove , setWrongMove);
+                      updatePathInBoard(row, col, matrix, setMatrix, setPiece, sethightlightValue , setReferenceVal ,whosTurn );
+                      updateBoard(row, col, matrix, setMatrix, setReferenceVal, referenceVal , piece ,setPiece , wrongMove , setWrongMove , whosTurn, setWhosTurn , sethightlightValue);
                     }}
                   >
                     {matrix[row][col] && (

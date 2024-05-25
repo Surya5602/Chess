@@ -45,45 +45,45 @@ export const imageMatrix = [
     ],
 ]
 
-export function updatePathInBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>> , whosTurn:string) {
+export function updatePathInBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string) {
     const extractedPieceName = findPiece(matrix[row][col])
-    if((extractedPieceName.includes("black") && whosTurn == "black" ) || (extractedPieceName.includes("white")&& whosTurn == "white") ){
-        const possibelPathArray = findPosibilePosition(extractedPieceName, row, col, setMatrix, matrix , whosTurn );
-   
-    setPiece((clickedPiece) => {
-        clickedPiece = [row, col]
-        return clickedPiece
-    })
-    sethightlightValue((prevVal: any) => {
-        prevVal = possibelPathArray
-        return prevVal
-    })
-    setReferenceVal((referenceVal) => {
-        referenceVal = possibelPathArray
-        return referenceVal
-    });
-    return possibelPathArray
-}
+    if ((extractedPieceName.includes("black") && whosTurn == "black") || (extractedPieceName.includes("white") && whosTurn == "white")) {
+        const possibelPathArray = findPosibilePosition(extractedPieceName, row, col, setMatrix, matrix, whosTurn);
+
+        setPiece((clickedPiece) => {
+            clickedPiece = [row, col]
+            return clickedPiece
+        })
+        sethightlightValue((prevVal: any) => {
+            prevVal = possibelPathArray
+            return prevVal
+        })
+        setReferenceVal((referenceVal) => {
+            referenceVal = possibelPathArray
+            return referenceVal
+        });
+        return possibelPathArray
+    }
 }
 
-export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string , setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>) {
+export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>) {
     if (referenceVal) {
         referenceVal.map((move) => {
             if (row == move[0] && col == move[1]) {
                 matrix[row][col] = matrix[piece[0]][piece[1]]
                 matrix[piece[0]][piece[1]] = ""
-                if(whosTurn == "white"){
+                if (whosTurn == "white") {
                     setWhosTurn("black");
                 }
-                else{
+                else {
                     setWhosTurn("white")
                 }
-                sethightlightValue((prevVal)=>{
+                sethightlightValue((prevVal) => {
                     prevVal = []
                     return prevVal;
                 })
-                
-            
+
+
             }
             // else{
             //     setWrongMove((prevMove)=>{
@@ -143,7 +143,7 @@ const findPiece = (piece: string) => {
     return pieceName;
 }
 
-const findPosibilePosition = (pieceName: string, row: number, col: number, setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, matrix: string[][] , whosTurn: string ) => {
+const findPosibilePosition = (pieceName: string, row: number, col: number, setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, matrix: string[][], whosTurn: string) => {
     let possiblePaths: number[][] = []
     switch (pieceName) {
         case "black-pawn":
@@ -179,7 +179,7 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
                 }
                 if (isValidMove(row + i, col)) {
                     let lowerPossibleMove: number[] = [row + i, col]
-                    
+
                     possiblePaths.push(lowerPossibleMove)
                 }
             }
@@ -194,12 +194,12 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
                 }
             }
             possiblePaths = removePathsOfSameTeam(row, col, possiblePaths, matrix)
-            console.log("rookPossible Moves" , possiblePaths)
+            console.log("rookPossible Moves", possiblePaths)
             break;
         case "black-bishop":
         case "white-bishop":
             for (let i: number = 1; i <= 8; i++) {
-                if (isValidMove(row - i, col - i) ) {
+                if (isValidMove(row - i, col - i)) {
                     let leftUpper: number[] = [row - i, col - i]
                     possiblePaths.push(leftUpper)
                 }
@@ -210,8 +210,8 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
             }
             for (let i: number = 1; i < 8; i++) {
                 if (isValidMove(row - i, col + i)) {
-                let rightUpper: number[] = [row - i, col + i]
-                possiblePaths.push(rightUpper)
+                    let rightUpper: number[] = [row - i, col + i]
+                    possiblePaths.push(rightUpper)
                 }
                 if (isValidMove(row + i, col + i)) {
                     let rightLower: number[] = [row + i, col + i]
@@ -244,7 +244,7 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
                 }
             }
             for (let i: number = 1; i <= 8; i++) {
-                if (isValidMove(row - i, col - i) ) {
+                if (isValidMove(row - i, col - i)) {
                     let leftUpper: number[] = [row - i, col - i]
                     possiblePaths.push(leftUpper)
                 }
@@ -255,15 +255,15 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
             }
             for (let i: number = 1; i < 8; i++) {
                 if (isValidMove(row - i, col + i)) {
-                let rightUpper: number[] = [row - i, col + i]
-                possiblePaths.push(rightUpper)
+                    let rightUpper: number[] = [row - i, col + i]
+                    possiblePaths.push(rightUpper)
                 }
                 if (isValidMove(row + i, col + i)) {
                     let rightLower: number[] = [row + i, col + i]
                     possiblePaths.push(rightLower)
                 }
             }
-            
+
             possiblePaths = removePathsOfSameTeam(row, col, possiblePaths, matrix)
             break;
         case "black-knight":
@@ -317,8 +317,8 @@ const removePathsOfSameTeam = (row: number, col: number, possiblePaths: number[]
             if ((intersectingPiece.includes("black") && clickedPiece.includes("black") || (intersectingPiece.includes("white") && clickedPiece.includes("white")))) {
                 optimizedPaths = optimizedPaths.filter(item => item != move)
             }
-            else if((intersectingPiece.includes("white") && clickedPiece.includes("black") || (intersectingPiece.includes("black") && clickedPiece.includes("white")))){
-                
+            else if ((intersectingPiece.includes("white") && clickedPiece.includes("black") || (intersectingPiece.includes("black") && clickedPiece.includes("white")))) {
+
             }
         }
     })

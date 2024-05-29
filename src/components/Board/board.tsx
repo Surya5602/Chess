@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { imageMatrix, updateBoard , updatePathInBoard } from '../../utils/helper'
+import {
+  imageMatrix,
+  updateBoard,
+  updatePathInBoard,
+} from "../../utils/helper";
 import "./board.css";
 function board() {
   const [referenceVal, setReferenceVal] = useState<number[][]>([]);
-  const [piece , setPiece] = useState<number[]>([]);
-  const [wrongMove , setWrongMove] = useState<number[]>([]);
+  const [piece, setPiece] = useState<number[]>([]);
+  const [wrongMove, setWrongMove] = useState<number[]>([]);
   const [matrix, setMatrix] = useState<string[][]>(imageMatrix);
-  const [hightlightValue , sethightlightValue] = useState<number[][]>([]);
-  const [whosTurn , setWhosTurn] = useState('white');
-  useEffect(()=>{
-    console.log(whosTurn)
-  },[whosTurn])
+  const [hightlightValue, sethightlightValue] = useState<number[][]>([]);
+  const [whosTurn, setWhosTurn] = useState("white");
+  const [takeDown, setTakeDown] = useState<number[][]>([]);
   return (
     <>
       <div className="board">
@@ -23,11 +25,53 @@ function board() {
                 return (
                   <div
                     key={colIndex}
-                    className={`${(col + row) % 2 == 0 ? "yellowBox" : "greenBox"
-                      } ${hightlightValue.findIndex((value)=> value[0] == row && value[1]==col) > -1 ? "possibleMove" : ""} ${ piece[0]==row && piece[1] == col && matrix[piece[0]][piece[1]] ? "clickedBox" : ""} ${wrongMove[0] == row && wrongMove[1] == col ? "wrongMove" : ""}`}
+                    className={`${
+                      (col + row) % 2 == 0 ? "yellowBox" : "greenBox"
+                    } ${
+                      hightlightValue.findIndex(
+                        (value) => value[0] == row && value[1] == col
+                      ) > -1
+                        ? "possibleMove"
+                        : ""
+                    } ${
+                      piece[0] == row &&
+                      piece[1] == col &&
+                      matrix[piece[0]][piece[1]]
+                        ? "clickedBox"
+                        : ""
+                    } ${
+                      wrongMove[0] == row && wrongMove[1] == col
+                        ? "wrongMove"
+                        : ""
+                    }`}
                     onClick={() => {
-                      updatePathInBoard(row, col, matrix, setMatrix, setPiece, sethightlightValue , setReferenceVal ,whosTurn );
-                      updateBoard(row, col, matrix, setMatrix, setReferenceVal, referenceVal , piece ,setPiece , wrongMove , setWrongMove , whosTurn, setWhosTurn , sethightlightValue);
+                      updatePathInBoard(
+                        row,
+                        col,
+                        matrix,
+                        setMatrix,
+                        setPiece,
+                        sethightlightValue,
+                        setReferenceVal,
+                        whosTurn,
+                        takeDown,
+                        setTakeDown
+                      );
+                      updateBoard(
+                        row,
+                        col,
+                        JSON.parse(JSON.stringify(matrix)),
+                        setMatrix,
+                        setReferenceVal,
+                        referenceVal,
+                        piece,
+                        setPiece,
+                        wrongMove,
+                        setWrongMove,
+                        whosTurn,
+                        setWhosTurn,
+                        sethightlightValue
+                      );
                     }}
                   >
                     {matrix[row][col] && (

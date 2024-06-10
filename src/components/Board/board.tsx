@@ -13,6 +13,9 @@ function board() {
   const [hightlightValue, sethightlightValue] = useState<number[][]>([]);
   const [whosTurn, setWhosTurn] = useState("white");
   const [takeDown, setTakeDown] = useState<number[][]>([]);
+  useEffect(() => {
+    console.log("takeDown", takeDown);
+  }, [takeDown]);
   return (
     <>
       <div className="board">
@@ -25,25 +28,23 @@ function board() {
                 return (
                   <div
                     key={colIndex}
-                    className={`${
-                      (col + row) % 2 == 0 ? "yellowBox" : "greenBox"
-                    } ${
-                      hightlightValue.findIndex(
+                    className={`${(col + row) % 2 == 0 ? "yellowBox" : "greenBox"
+                      } ${hightlightValue.findIndex(
                         (value) => value[0] == row && value[1] == col
                       ) > -1
                         ? "possibleMove"
                         : ""
-                    } ${
-                      piece[0] == row &&
-                      piece[1] == col &&
-                      matrix[piece[0]][piece[1]]
+                      } ${piece[0] == row &&
+                        piece[1] == col &&
+                        matrix[piece[0]][piece[1]]
                         ? "clickedBox"
                         : ""
-                    } ${
-                      wrongMove[0] == row && wrongMove[1] == col
-                        ? "wrongMove"
+                      } ${takeDown.findIndex(
+                        (value) => value[0] == row && value[1] == col
+                      ) > -1
+                        ? "cuttingPiece"
                         : ""
-                    }`}
+                      }`}
                     onClick={() => {
                       updatePathInBoard(
                         row,
@@ -70,7 +71,9 @@ function board() {
                         setWrongMove,
                         whosTurn,
                         setWhosTurn,
-                        sethightlightValue
+                        sethightlightValue,
+                        takeDown,
+                        setTakeDown
                       );
                     }}
                   >

@@ -1,38 +1,51 @@
-.row{
-    display: flex;
+.row {
+  display: flex;
 }
-.yellowBox{
-    background-color: rgb(235,236,208);
-    height: 4em;
-    width: 4em;
+.yellowBox {
+  background-color: rgb(235, 236, 208);
+  height: 4em;
+  width: 4em;
 }
-.greenBox{
-    background-color: rgb(115,149,82);
-    height: 4em;
-    width: 4em;
+.greenBox {
+  background-color: rgb(115, 149, 82);
+  height: 4em;
+  width: 4em;
 }
-.row img{
-    width: 4em;
-    height: 4em;
-    position: absolute;
+.row img {
+  width: 4em;
+  height: 4em;
+  position: absolute;
 }
-.possibleMove{
-   position: relative;
+.possibleMove {
+  position: relative;
 }
-.possibleMove::after{
+.possibleMove::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background-color: #6380468f;
+  border-radius: 50%;
+}
+.clickedBox {
+  background-color: rgb(255, 255, 160);
+}
+.wrongMove {
+  background-color: rgb(196, 35, 24);
+}
+.cuttingPiece {
+  position: relative;
+}
+.cuttingPiece::after {
     content: "";
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 20px; 
-    height: 20px;
-    background-color: #6380468f; 
-    border-radius: 50%; 
-}
-.clickedBox{
-    background-color: rgb(255, 255, 160);
-}
-.wrongMove{
-    background-color: rgb(196, 35, 24);
+    width: 55px;
+    height: 55px;
+    border: 5px solid #ff00008f;
 }

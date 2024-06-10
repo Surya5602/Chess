@@ -66,7 +66,7 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
     }
 }
 
-export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>
+export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>
 ) {
     if (referenceVal) {
         referenceVal.map((move) => {
@@ -87,8 +87,10 @@ export function updateBoard(row: number, col: number, matrix: string[][], setMat
                     referenceVal = []
                     return referenceVal
                 });
-
-
+                setTakeDown((prevVal) =>{
+                    prevVal = []
+                    return prevVal
+                })
             }
         })
         setMatrix(matrix)
@@ -163,7 +165,7 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
             if (updateMove === "sameTeam") {
                 temp[direction] = false;
             } else if (updateMove === "oppositeTeam") {
-                setTakeDown((preVal) => [...preVal, [r, c]]);
+                setTakeDown((preVal) => preVal = [...preVal, [r, c]]);
                 temp[direction] = false;
             }
         } else {
@@ -287,7 +289,7 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
                 [1, 0], [-1, 0], [1, -1], [-1, 1]
             ];
             for (const [rowOffset, colOffset] of kingMoveOffsets) {
-                if( isValidMove(row + rowOffset ,col + colOffset ) && matrix[row + rowOffset][col + colOffset] == ''){
+                if (isValidMove(row + rowOffset, col + colOffset) && matrix[row + rowOffset][col + colOffset] == '') {
                     possiblePaths.push([(row + rowOffset), col + colOffset]);
                 }
             }

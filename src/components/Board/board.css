@@ -3,17 +3,17 @@
 }
 .yellowBox {
   background-color: rgb(235, 236, 208);
-  height: 4em;
-  width: 4em;
+  height: 3.7em;
+  width: 3.7em;
 }
 .greenBox {
   background-color: rgb(115, 149, 82);
-  height: 4em;
-  width: 4em;
+  height: 3.7em;
+  width: 3.7em;
 }
 .row img {
-  width: 4em;
-  height: 4em;
+  width: 3.7em;
+  height: 3.7em;
   position: absolute;
 }
 .possibleMove {
@@ -40,12 +40,24 @@
   position: relative;
 }
 .cuttingPiece::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 55px;
-    height: 55px;
-    border: 5px solid #ff00008f;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 55px;
+  height: 55px;
+  border: 5px solid #ff00008f;
+}
+
+.chessBoard {
+  display: flex;
+  flex-direction: column ;
+  height: 95vh;
+  justify-content: center;
+  margin-left: 10% ;
+}
+.Player{
+  width: 10em;
+  padding: 1em 0;
 }

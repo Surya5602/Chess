@@ -13,11 +13,11 @@ function board() {
   const [hightlightValue, sethightlightValue] = useState<number[][]>([]);
   const [whosTurn, setWhosTurn] = useState("white");
   const [takeDown, setTakeDown] = useState<number[][]>([]);
-  useEffect(() => {
-    console.log("takeDown", takeDown);
-  }, [takeDown]);
+  const [blackCapturedPieces , setBlackCapturedPieces] = useState<number[]>([]);
+  const [whiteCapturedPieces , setWhiteCapturedPieces] = useState<number[]>([]);
   return (
     <>
+    <div className="Player blackPlayer">Player 1</div>
       <div className="board">
         {Array.from({ length: 8 }).map((_, rowIndex) => {
           const row: number = rowIndex;
@@ -87,6 +87,7 @@ function board() {
           );
         })}
       </div>
+      <div className="Player whitePlayer">Player 2</div>
     </>
   );
 }

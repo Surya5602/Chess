@@ -48,6 +48,14 @@ export const imageMatrix = [
 export function updatePathInBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>
 ) {
     const extractedPieceName = findPiece(matrix[row][col])
+    setTakeDown((prevVal) => {
+        prevVal = []
+        return prevVal;
+    })
+    sethightlightValue((prevVal) => {
+        prevVal = []
+        return prevVal;
+    })
     if ((extractedPieceName.includes("black") && whosTurn == "black") || (extractedPieceName.includes("white") && whosTurn == "white")) {
         const possibelPathArray = findPosibilePosition(extractedPieceName, row, col, setMatrix, matrix, whosTurn, takeDown, setTakeDown);
         setPiece((clickedPiece) => {
@@ -87,7 +95,7 @@ export function updateBoard(row: number, col: number, matrix: string[][], setMat
                     referenceVal = []
                     return referenceVal
                 });
-                setTakeDown((prevVal) =>{
+                setTakeDown((prevVal) => {
                     prevVal = []
                     return prevVal
                 })
@@ -156,7 +164,11 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
         leftUpper: true,
         rightLower: true,
         leftLower: true,
-        rightUpper: true
+        rightUpper: true,
+        blackPawnLeftCapture: true,
+        blackPawnRightCapture: true,
+        whitePawnLeftCapture: true,
+        whitePawnRightCapture: true,
     }
     const handleMove = (r: number, c: number, direction: keyof typeof temp) => {
         if (!isValidMove(r, c) || !temp[direction]) return;
@@ -166,9 +178,11 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
                 temp[direction] = false;
             } else if (updateMove === "oppositeTeam") {
                 setTakeDown((preVal) => preVal = [...preVal, [r, c]]);
+                possiblePaths.push([r, c]);
                 temp[direction] = false;
             }
         } else {
+            // setTakeDown((preVal) => preVal = []);
             possiblePaths.push([r, c]);
         }
     };
@@ -184,6 +198,9 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
                 let firstBlackPossible: number[] = [row + 1, col]
                 possiblePaths.push(firstBlackPossible)
             }
+            // pawn moves when they have possible move to capture piece
+            if (matrix[row + 1][col - 1] != "") handleMove(row + 1, col - 1, "blackPawnLeftCapture")
+            if (matrix[row + 1][col + 1] != "") handleMove(row + 1, col + 1, "blackPawnRightCapture")
             break;
         case "white-pawn":
             if (row == 6) {
@@ -196,6 +213,9 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
                 let firstWhitePossible: number[] = [row - 1, col]
                 possiblePaths.push(firstWhitePossible)
             }
+            // pawn moves when they have possible move to capture piece
+            if (matrix[row - 1][col - 1] != "") handleMove(row - 1, col - 1, "blackPawnLeftCapture")
+            if (matrix[row - 1][col + 1] != "") handleMove(row - 1, col + 1, "blackPawnRightCapture")
             break;
         case "white-rook":
         case "black-rook":
@@ -274,10 +294,18 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, setMa
             ];
             for (const [rowOffset, colOffset] of moveOffsets) {
                 let bool = isValidMove(row + rowOffset, col + colOffset)
-                const pieceIntersection = bool && matrix[row + rowOffset][col + colOffset] == '' ? true : false
+                let pieceEmpty = false
+                if (bool) pieceEmpty = matrix[row + rowOffset][col + colOffset] == '' ? true : false
+                const pieceIntersection = bool && pieceEmpty
+                if (bool && pieceEmpty == false) {
+                    const pieceName = findPiece(matrix[row + rowOffset][col + colOffset])
+                    if ((pieceName.includes("black") && whosTurn == "white") || (pieceName.includes("white") && whosTurn == "black")) {
+                        setTakeDown((preVal) => preVal = [...preVal, [row + rowOffset, col + colOffset]]);
+                        possiblePaths.push([row + rowOffset, col + colOffset]);
+                    }
+                }
                 if (bool && pieceIntersection) {
                     possiblePaths.push([(row + rowOffset), col + colOffset]);
-
                 }
             }
             break;
@@ -315,6 +343,5 @@ const removePathsOfSameTeam = (row: number, col: number, matrix: string[][], who
     else {
         outputValue = ""
     }
-
     return outputValue
 }

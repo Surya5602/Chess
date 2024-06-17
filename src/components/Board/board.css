@@ -59,5 +59,18 @@
 }
 .Player{
   width: 10em;
-  padding: 1em 0;
+  padding: 0.5em 0 0.5em 0;
+  display: flex;
+  align-items: center;
+}
+.Player p{
+  margin: 0;
+}
+.capturedPieces{
+  width: 2em;
+  height: 2em;
+  display: flex;
+}
+.capturedPieces img{
+  width: 100%;
 }

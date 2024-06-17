@@ -74,31 +74,45 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
     }
 }
 
-export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>
-) {
+export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, capturedPieces: { [key: string]: string[]; }, setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>) {
+    const updatePieces = () => {
+        matrix[row][col] = matrix[piece[0]][piece[1]]
+        matrix[piece[0]][piece[1]] = ""
+        if (whosTurn == "white") {
+            setWhosTurn("black");
+        }
+        else {
+            setWhosTurn("white")
+        }
+        sethightlightValue((prevVal) => {
+            prevVal = []
+            return prevVal;
+        })
+        setReferenceVal((referenceVal) => {
+            referenceVal = []
+            return referenceVal
+        });
+        setTakeDown((prevVal) => {
+            prevVal = []
+            return prevVal
+        })
+    }
     if (referenceVal) {
         referenceVal.map((move) => {
-            if (row == move[0] && col == move[1]) {
-                matrix[row][col] = matrix[piece[0]][piece[1]]
-                matrix[piece[0]][piece[1]] = ""
-                if (whosTurn == "white") {
-                    setWhosTurn("black");
-                }
-                else {
-                    setWhosTurn("white")
-                }
-                sethightlightValue((prevVal) => {
-                    prevVal = []
-                    return prevVal;
+            if ((row == move[0] && col == move[1]) && (matrix[move[0]][move[1]] == '')) {
+                updatePieces()
+            }
+            else if ((row == move[0] && col == move[1]) && (matrix[move[0]][move[1]] != '')) {
+                const capturingPiece = findPiece(matrix[row][col]);
+                const capturingPieceURL = matrix[row][col];
+                setCapturedPieces((prev) => {
+                    const preVal = JSON.parse(JSON.stringify(prev))
+                    const key = capturingPiece.includes("white") ? "whitePieces" : "blackPieces"
+                    console.log("matrix[row][col]", capturingPieceURL)
+                    preVal[key] = [...preVal[key], capturingPieceURL]
+                    return { ...preVal }
                 })
-                setReferenceVal((referenceVal) => {
-                    referenceVal = []
-                    return referenceVal
-                });
-                setTakeDown((prevVal) => {
-                    prevVal = []
-                    return prevVal
-                })
+                updatePieces()
             }
         })
         setMatrix(matrix)

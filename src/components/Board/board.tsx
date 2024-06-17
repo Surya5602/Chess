@@ -13,11 +13,22 @@ function board() {
   const [hightlightValue, sethightlightValue] = useState<number[][]>([]);
   const [whosTurn, setWhosTurn] = useState("white");
   const [takeDown, setTakeDown] = useState<number[][]>([]);
-  const [blackCapturedPieces , setBlackCapturedPieces] = useState<number[]>([]);
-  const [whiteCapturedPieces , setWhiteCapturedPieces] = useState<number[]>([]);
+  const [capturedPieces, setCapturedPieces] = useState<{
+    [key: string]: string[];
+  }>({
+    whitePieces: [],
+    blackPieces: [],
+  });
   return (
     <>
-    <div className="Player blackPlayer">Player 1</div>
+      <div className="Player blackPlayer">
+        <p>Player 1</p>
+        <div className="capturedPieces">
+          {capturedPieces["blackPieces"].map((element, index) => (
+            <img key={index} src={element} alt={`Captured piece ${index}`} />
+          ))}
+        </div>
+      </div>
       <div className="board">
         {Array.from({ length: 8 }).map((_, rowIndex) => {
           const row: number = rowIndex;
@@ -28,23 +39,27 @@ function board() {
                 return (
                   <div
                     key={colIndex}
-                    className={`${(col + row) % 2 == 0 ? "yellowBox" : "greenBox"
-                      } ${hightlightValue.findIndex(
+                    className={`${
+                      (col + row) % 2 == 0 ? "yellowBox" : "greenBox"
+                    } ${
+                      hightlightValue.findIndex(
                         (value) => value[0] == row && value[1] == col
                       ) > -1
                         ? "possibleMove"
                         : ""
-                      } ${piece[0] == row &&
-                        piece[1] == col &&
-                        matrix[piece[0]][piece[1]]
+                    } ${
+                      piece[0] == row &&
+                      piece[1] == col &&
+                      matrix[piece[0]][piece[1]]
                         ? "clickedBox"
                         : ""
-                      } ${takeDown.findIndex(
+                    } ${
+                      takeDown.findIndex(
                         (value) => value[0] == row && value[1] == col
                       ) > -1
                         ? "cuttingPiece"
                         : ""
-                      }`}
+                    }`}
                     onClick={() => {
                       updatePathInBoard(
                         row,
@@ -73,7 +88,9 @@ function board() {
                         setWhosTurn,
                         sethightlightValue,
                         takeDown,
-                        setTakeDown
+                        setTakeDown,
+                        capturedPieces,
+                        setCapturedPieces
                       );
                     }}
                   >
@@ -87,7 +104,14 @@ function board() {
           );
         })}
       </div>
-      <div className="Player whitePlayer">Player 2</div>
+      <div className="Player blackPlayer">
+        <p>Player 2</p>
+        <div className="capturedPieces">
+          {capturedPieces["whitePieces"].map((element, index) => (
+            <img key={index} src={element} alt={`Captured piece ${index}`} />
+          ))}
+        </div>
+      </div>
     </>
   );
 }

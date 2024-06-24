@@ -45,8 +45,7 @@ export const imageMatrix = [
     ],
 ]
 
-export function updatePathInBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>
-) {
+export function updatePathInBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, kingPositions: { [key: string]: number[]; }) {
     const extractedPieceName = findPiece(matrix[row][col])
     setTakeDown((prevVal) => {
         prevVal = []
@@ -58,6 +57,7 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
     })
     if ((extractedPieceName.includes("black") && whosTurn == "black") || (extractedPieceName.includes("white") && whosTurn == "white")) {
         const possibelPathArray = findPosibilePosition(extractedPieceName, row, col, setMatrix, matrix, whosTurn, takeDown, setTakeDown);
+        const findChecksPaths = whosTurn == "white" ? checkPathsofKingsCheck(matrix, kingPositions["whiteKing"], "black") : checkPathsofKingsCheck(matrix, kingPositions["blackKing"], "white")
         setPiece((clickedPiece) => {
             clickedPiece = [row, col]
             return clickedPiece
@@ -74,8 +74,20 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
     }
 }
 
-export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, capturedPieces: { [key: string]: string[]; }, setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>) {
+export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, capturedPieces: { [key: string]: string[]; }, setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>, setKingPositions: React.Dispatch<React.SetStateAction<{ [key: string]: number[]; }>>) {
     const updatePieces = () => {
+        const updatingPieceName = findPiece(matrix[piece[0]][piece[1]])
+        if (updatingPieceName.includes("white-king")) {
+            setKingPositions((prevVal) => {
+                return { ...prevVal, "whiteKing": [row, col] }
+
+            })
+        }
+        else if (updatingPieceName.includes("black-king")) {
+            setKingPositions((prevVal) => {
+                return { ...prevVal, "blackKing": [row, col] }
+            })
+        }
         matrix[row][col] = matrix[piece[0]][piece[1]]
         matrix[piece[0]][piece[1]] = ""
         if (whosTurn == "white") {
@@ -108,7 +120,6 @@ export function updateBoard(row: number, col: number, matrix: string[][], setMat
                 setCapturedPieces((prev) => {
                     const preVal = JSON.parse(JSON.stringify(prev))
                     const key = capturingPiece.includes("white") ? "whitePieces" : "blackPieces"
-                    console.log("matrix[row][col]", capturingPieceURL)
                     preVal[key] = [...preVal[key], capturingPieceURL]
                     return { ...preVal }
                 })
@@ -358,4 +369,162 @@ const removePathsOfSameTeam = (row: number, col: number, matrix: string[][], who
         outputValue = ""
     }
     return outputValue
+}
+const checkPathsofKingsCheck = (matrix: string[][], kingPositions: number[], checkFor: string) => {
+    interface outputObject {
+        "checkPossiblePath": number[][];
+        "isIntersecting": boolean;
+    }
+    interface checkObj {
+        path: number[][];
+        intersection: boolean;
+    }
+
+    interface DirectionalCheck {
+        left: checkObj;
+        right: checkObj;
+        upper: checkObj;
+        lower: checkObj;
+        leftUpper: checkObj;
+        leftLower: checkObj;
+        rightUpper: checkObj;
+        rightLower: checkObj;
+    }
+
+    const directionChecker: { [key: string]: boolean } = {
+        upper: true,
+        lower: true,
+        left: true,
+        right: true,
+        leftUpper: true,
+        rightLower: true,
+        leftLower: true,
+        rightUpper: true,
+        blackPawnLeftCapture: true,
+        blackPawnRightCapture: true,
+        whitePawnLeftCapture: true,
+        whitePawnRightCapture: true,
+    }
+    const tempCheckPath: DirectionalCheck = {
+        left: {
+            path: [],
+            intersection: false,
+        },
+        right: {
+            path: [],
+            intersection: false,
+        },
+        upper: {
+            path: [],
+            intersection: false,
+        },
+        lower: {
+            path: [],
+            intersection: false,
+        },
+        leftUpper: {
+            path: [],
+            intersection: false,
+        },
+        leftLower: {
+            path: [],
+            intersection: false,
+        },
+        rightUpper: {
+            path: [],
+            intersection: false,
+        },
+        rightLower: {
+            path: [],
+            intersection: false,
+        }
+    }
+    let checkString: string = ''
+    const findIntersection = (row: number, col: number, direction: string) => {
+        const intersectingPiece = findPiece(matrix[row][col])
+        if (intersectingPiece.includes(checkFor)) {
+            if (direction == "upper" || direction == "lower" || direction == "left" || direction == "right") {
+                if (intersectingPiece.includes("queen") || intersectingPiece.includes("rook")) {
+                    checkString = "oppositeTeam"
+                }
+            }
+            else if (direction == "leftUpper" || direction == "leftLower" || direction == "rightUpper" || direction == "rightLower") {
+                if (intersectingPiece.includes("queen") || intersectingPiece.includes("bishop")) {
+                    checkString = "oppositeTeam"
+                }
+            }
+        }
+        else if (intersectingPiece == "chess-coin") {
+            checkString = "noIntersection"
+        }
+        else {
+            checkString = "sameTeam"
+        }
+        return checkString
+    }
+
+    const updatingCheckPossiblePath = (row: number, col: number, direction: keyof (DirectionalCheck)) => {
+        if (findIntersection(row, col, direction) == "noIntersection") {
+            tempCheckPath[direction].path.push([row, col])
+        }
+        else if (findIntersection(row, col, direction) == "sameTeam") {
+            directionChecker[direction] = false
+        }
+        else if (findIntersection(row, col, direction) == "oppositeTeam") {
+            tempCheckPath[direction].intersection = true
+            directionChecker[direction] = false
+        }
+    }
+    for (let i: number = 1; i <= 8; i++) {
+        if (isValidMove(kingPositions[0] - i, kingPositions[1]) && directionChecker.upper) {
+            const row = kingPositions[0] - i
+            const col = kingPositions[1]
+            updatingCheckPossiblePath(row, col, "upper")
+        }
+        if (isValidMove(kingPositions[0] + i, kingPositions[1]) && directionChecker.lower) {
+            const row = kingPositions[0] + i
+            const col = kingPositions[1]
+            updatingCheckPossiblePath(row, col, "lower")
+
+        }
+        if (isValidMove(kingPositions[0], kingPositions[1] - i) && directionChecker.left) {
+            const row = kingPositions[0]
+            const col = kingPositions[1] - i
+            updatingCheckPossiblePath(row, col, "left")
+
+        }
+        if (isValidMove(kingPositions[0], kingPositions[1] + i) && directionChecker.right) {
+            const row = kingPositions[0]
+            const col = kingPositions[1] + i
+            updatingCheckPossiblePath(row, col, "right")
+        }
+        if (isValidMove(kingPositions[0] - i, kingPositions[1] - i) && directionChecker.leftUpper) {
+            const row = kingPositions[0] - i
+            const col = kingPositions[1] - i
+            updatingCheckPossiblePath(row, col, "leftUpper")
+        }
+        if (isValidMove(kingPositions[0] + i, kingPositions[1] - i) && directionChecker.leftLower) {
+            const row = kingPositions[0] + i
+            const col = kingPositions[1] - i
+            updatingCheckPossiblePath(row, col, "leftLower")
+        }
+        if (isValidMove(kingPositions[0] - i, kingPositions[1] + i) && directionChecker.rightUpper) {
+            const row = kingPositions[0] - i
+            const col = kingPositions[1] + i
+            updatingCheckPossiblePath(row, col, "rightUpper")
+        }
+        if (isValidMove(kingPositions[0] + i, kingPositions[1] + i) && directionChecker.rightLower) {
+            const row = kingPositions[0] + i
+            const col = kingPositions[1] + i
+            updatingCheckPossiblePath(row, col, "rightLower")
+        }
+    }
+    Object.entries(tempCheckPath).forEach(([key, value]) => {
+        if (value.intersection == false) {
+            delete tempCheckPath[key as keyof DirectionalCheck];
+        }
+    });
+    console.log("tempCheckPath", tempCheckPath);
+
+    return tempCheckPath
 }

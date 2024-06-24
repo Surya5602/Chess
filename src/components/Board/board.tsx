@@ -19,12 +19,18 @@ function board() {
     whitePieces: [],
     blackPieces: [],
   });
+  const [kingPositions , setKingPositions] = useState<{
+    [key: string]: number[];
+  }>({
+    whiteKing: [7,4],
+    blackKing: [0,4],
+  });
   return (
     <>
       <div className="Player blackPlayer">
         <p>Player 1</p>
         <div className="capturedPieces">
-          {capturedPieces["blackPieces"].map((element, index) => (
+          {capturedPieces["whitePieces"].map((element, index) => (
             <img key={index} src={element} alt={`Captured piece ${index}`} />
           ))}
         </div>
@@ -71,7 +77,8 @@ function board() {
                         setReferenceVal,
                         whosTurn,
                         takeDown,
-                        setTakeDown
+                        setTakeDown,
+                        kingPositions
                       );
                       updateBoard(
                         row,
@@ -90,7 +97,8 @@ function board() {
                         takeDown,
                         setTakeDown,
                         capturedPieces,
-                        setCapturedPieces
+                        setCapturedPieces,
+                        setKingPositions
                       );
                     }}
                   >
@@ -107,7 +115,7 @@ function board() {
       <div className="Player blackPlayer">
         <p>Player 2</p>
         <div className="capturedPieces">
-          {capturedPieces["whitePieces"].map((element, index) => (
+          {capturedPieces["blackPieces"].map((element, index) => (
             <img key={index} src={element} alt={`Captured piece ${index}`} />
           ))}
         </div>

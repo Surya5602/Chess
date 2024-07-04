@@ -45,7 +45,7 @@ export const imageMatrix = [
     ],
 ]
 
-export function updatePathInBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, kingPositions: { [key: string]: number[]; }) {
+export function updatePathInBoard(row: number, col: number, matrix: string[][],setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, kingPositions: { [key: string]: number[]; }) {
     const extractedPieceName = findPiece(matrix[row][col])
     setTakeDown((prevVal) => {
         prevVal = []
@@ -57,7 +57,7 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
     })
     if ((extractedPieceName.includes("black") && whosTurn == "black") || (extractedPieceName.includes("white") && whosTurn == "white")) {
         // checking the possible moves        
-        let possibelPathArray = findPosibilePosition(extractedPieceName, row, col, setMatrix, matrix, whosTurn, takeDown, setTakeDown);
+        let possibelPathArray = findPosibilePosition(extractedPieceName, row, col,matrix, whosTurn, setTakeDown);
 
         // Check whether the check is happened while moving 
         // this should happen when there is check 
@@ -99,7 +99,7 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
     }
 }
 
-export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], setPiece: React.Dispatch<React.SetStateAction<number[]>>, wrongMove: number[], setWrongMove: React.Dispatch<React.SetStateAction<number[]>>, whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, capturedPieces: { [key: string]: string[]; }, setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>, setKingPositions: React.Dispatch<React.SetStateAction<{ [key: string]: number[]; }>>) {
+export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[],whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>,setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>, setKingPositions: React.Dispatch<React.SetStateAction<{ [key: string]: number[]; }>>) {
     const updatePieces = () => {
         // Changing of kings positions after the change of the kings piece
         const updatingPieceName = findPiece(matrix[piece[0]][piece[1]])
@@ -204,7 +204,7 @@ const findPiece = (piece: string) => {
     return pieceName;
 }
 
-const findPosibilePosition = (pieceName: string, row: number, col: number, setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, matrix: string[][], whosTurn: string, takeDown: number[][], setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>) => {
+const findPosibilePosition = (pieceName: string, row: number, col: number, matrix: string[][], whosTurn: string, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>) => {
     let possiblePaths: number[][] = []
     const temp = {
         upper: true,

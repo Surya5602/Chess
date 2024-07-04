@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   imageMatrix,
   updateBoard,
@@ -8,7 +8,6 @@ import "./board.css";
 function board() {
   const [referenceVal, setReferenceVal] = useState<number[][]>([]);
   const [piece, setPiece] = useState<number[]>([]);
-  const [wrongMove, setWrongMove] = useState<number[]>([]);
   const [matrix, setMatrix] = useState<string[][]>(imageMatrix);
   const [hightlightValue, sethightlightValue] = useState<number[][]>([]);
   const [whosTurn, setWhosTurn] = useState("white");
@@ -71,12 +70,10 @@ function board() {
                         row,
                         col,
                         matrix,
-                        setMatrix,
                         setPiece,
                         sethightlightValue,
                         setReferenceVal,
                         whosTurn,
-                        takeDown,
                         setTakeDown,
                         kingPositions
                       );
@@ -88,15 +85,10 @@ function board() {
                         setReferenceVal,
                         referenceVal,
                         piece,
-                        setPiece,
-                        wrongMove,
-                        setWrongMove,
                         whosTurn,
                         setWhosTurn,
                         sethightlightValue,
-                        takeDown,
                         setTakeDown,
-                        capturedPieces,
                         setCapturedPieces,
                         setKingPositions
                       );

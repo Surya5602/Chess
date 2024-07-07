@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   imageMatrix,
   updateBoard,
   updatePathInBoard,
+  findGameEnds,
 } from "../../utils/helper";
 import "./board.css";
 function board() {
@@ -18,12 +19,30 @@ function board() {
     whitePieces: [],
     blackPieces: [],
   });
-  const [kingPositions , setKingPositions] = useState<{
+  const [kingPositions, setKingPositions] = useState<{
     [key: string]: number[];
   }>({
-    whiteKing: [7,4],
-    blackKing: [0,4],
+    whiteKing: [7, 4],
+    blackKing: [0, 4],
   });
+  const [checkMate, setCheckMate] = useState<{
+    isGameOver: boolean;
+    winMessage: string;
+    status: string;
+  }>({
+    isGameOver: false,
+    winMessage: "",
+    status: "",
+  });
+
+  useEffect(() => {
+    if (checkMate.isGameOver === false) {
+      findGameEnds(whosTurn, kingPositions, matrix, setCheckMate);
+    } else {
+      window.alert(checkMate.winMessage);
+    }
+  }, [whosTurn, checkMate]);
+
   return (
     <>
       <div className="Player blackPlayer">

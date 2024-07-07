@@ -45,7 +45,7 @@ export const imageMatrix = [
     ],
 ]
 
-export function updatePathInBoard(row: number, col: number, matrix: string[][],setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, kingPositions: { [key: string]: number[]; }) {
+export function updatePathInBoard(row: number, col: number, matrix: string[][], setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, kingPositions: { [key: string]: number[]; }) {
     const extractedPieceName = findPiece(matrix[row][col])
     setTakeDown((prevVal) => {
         prevVal = []
@@ -55,12 +55,8 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][],s
         prevVal = []
         return prevVal;
     })
-    if ((extractedPieceName.includes("black") && whosTurn == "black") || (extractedPieceName.includes("white") && whosTurn == "white")) {
-        // checking the possible moves        
-        let possibelPathArray = findPosibilePosition(extractedPieceName, row, col,matrix, whosTurn, setTakeDown);
 
-        // Check whether the check is happened while moving 
-        // this should happen when there is check 
+    const possiblePathUpdation = ((possibelPathArray: number[][]) => {
         possibelPathArray = possibelPathArray.filter((path) => {
             const copyMatrix: string[][] = JSON.parse(JSON.stringify(matrix))
             copyMatrix[path[0]][path[1]] = copyMatrix[row][col]
@@ -74,6 +70,15 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][],s
                 return Object.keys(filterPathsChecks).length == 0
             }
         })
+        return possibelPathArray
+    })
+
+    if ((extractedPieceName.includes("black") && whosTurn == "black") || (extractedPieceName.includes("white") && whosTurn == "white")) {
+        // checking the possible moves        
+        let possibelPathArray = findPosibilePosition(extractedPieceName, row, col, matrix, whosTurn);
+        // Check whether the check is happened while moving 
+        // this should happen when there is check 
+        possibelPathArray = possiblePathUpdation(possibelPathArray)
         /// setting the capturing possibilitis
         if (possibelPathArray) {
             possibelPathArray.forEach((array) => {
@@ -99,7 +104,7 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][],s
     }
 }
 
-export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[],whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>,setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>, setKingPositions: React.Dispatch<React.SetStateAction<{ [key: string]: number[]; }>>) {
+export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>, setKingPositions: React.Dispatch<React.SetStateAction<{ [key: string]: number[]; }>>) {
     const updatePieces = () => {
         // Changing of kings positions after the change of the kings piece
         const updatingPieceName = findPiece(matrix[piece[0]][piece[1]])
@@ -153,7 +158,6 @@ export function updateBoard(row: number, col: number, matrix: string[][], setMat
         })
         setMatrix(matrix)
     }
-
 }
 
 const findPiece = (piece: string) => {
@@ -204,7 +208,7 @@ const findPiece = (piece: string) => {
     return pieceName;
 }
 
-const findPosibilePosition = (pieceName: string, row: number, col: number, matrix: string[][], whosTurn: string, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>) => {
+const findPosibilePosition = (pieceName: string, row: number, col: number, matrix: string[][], whosTurn: string) => {
     let possiblePaths: number[][] = []
     const temp = {
         upper: true,
@@ -348,7 +352,6 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, matri
                 if (bool && pieceEmpty == false) {
                     const pieceName = findPiece(matrix[row + rowOffset][col + colOffset])
                     if ((pieceName.includes("black") && whosTurn == "white") || (pieceName.includes("white") && whosTurn == "black")) {
-                        setTakeDown((preVal) => preVal = [...preVal, [row + rowOffset, col + colOffset]]);
                         possiblePaths.push([row + rowOffset, col + colOffset]);
                     }
                 }
@@ -365,8 +368,10 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, matri
                 [1, 0], [-1, 0], [1, -1], [-1, 1]
             ];
             for (const [rowOffset, colOffset] of kingMoveOffsets) {
-                if (isValidMove(row + rowOffset, col + colOffset) && !findPiece(matrix[row + rowOffset][col + colOffset]).includes(whosTurn)) {
-                    possiblePaths.push([(row + rowOffset), col + colOffset]);
+                if (isValidMove(row + rowOffset, col + colOffset)) {
+                    const updateMove = removePathsOfSameTeam(row + rowOffset, col + colOffset, matrix, whosTurn)
+                    if (updateMove === "oppositeTeam" || updateMove === "emptyCoin")
+                        possiblePaths.push([(row + rowOffset), col + colOffset]);
                 }
             }
             break;
@@ -389,7 +394,7 @@ const removePathsOfSameTeam = (row: number, col: number, matrix: string[][], who
         outputValue = "oppositeTeam"
     }
     else {
-        outputValue = ""
+        outputValue = "emptyCoin"
     }
     return outputValue
 }
@@ -596,4 +601,95 @@ const checkPathsofKingsCheck = (matrix: string[][], kingPositions: number[], che
         }
     });
     return tempCheckPath
+}
+
+export const findGameEnds = (whosTurn: string, kingPositions: { [key: string]: number[]; }, matrix: string[][],setCheckMate: React.Dispatch<React.SetStateAction<{ isGameOver: boolean; winMessage: string; status: string; }>>) => {
+    const possiblePathUpdation = ((possibelPathArray: number[][], row: number, col: number) => {
+        possibelPathArray = possibelPathArray.filter((path) => {
+            const copyMatrix: string[][] = JSON.parse(JSON.stringify(matrix))
+            const extractedPieceName = findPiece(copyMatrix[row][col])
+            copyMatrix[path[0]][path[1]] = copyMatrix[row][col]
+            copyMatrix[row][col] = ""
+            if (extractedPieceName.includes("king")) {
+                const filterPathsChecks = whosTurn == "white" ? checkPathsofKingsCheck(copyMatrix, path, "black") : checkPathsofKingsCheck(copyMatrix, path, "white")
+                return Object.keys(filterPathsChecks).length == 0
+            }
+            else {
+                const filterPathsChecks = whosTurn == "white" ? checkPathsofKingsCheck(copyMatrix, kingPositions["whiteKing"], "black") : checkPathsofKingsCheck(copyMatrix, kingPositions["blackKing"], "white")
+                return Object.keys(filterPathsChecks).length == 0
+            }
+        })
+        return possibelPathArray
+    })
+    const possiblePathsFilter = ((possibelPathArray: number[][], currRow: number, currCol: number, matrix: string[][]) => {
+        const tempMatrix = JSON.parse(JSON.stringify(matrix))
+        const checkingPieceName = findPiece(tempMatrix[currRow][currCol])
+        possibelPathArray = possibelPathArray.filter(() => {
+            if (!checkingPieceName.includes("king")) {
+                const filterPathsChecks = whosTurn == "white" ? checkPathsofKingsCheck(tempMatrix, kingPositions["whiteKing"], "black") : checkPathsofKingsCheck(tempMatrix, kingPositions["blackKing"], "white")
+                return Object.keys(filterPathsChecks).length == 0
+            }
+        })
+        return possibelPathArray
+    })
+    const findGameEnd = (whosTurn: string, matrix: string[][]) => {
+        let copyMatrix = JSON.parse(JSON.stringify(matrix));
+        interface objectVal {
+            currentlyhavingCheck: boolean,
+            otherPieceHaveMoves: boolean
+        }
+        const gameOutput: objectVal = {
+            currentlyhavingCheck: false,
+            otherPieceHaveMoves: false
+        }
+        const filterPathsChecks = whosTurn == "white" ? checkPathsofKingsCheck(copyMatrix, kingPositions["whiteKing"], "black") : checkPathsofKingsCheck(copyMatrix, kingPositions["blackKing"], "white")
+        if (Object.keys(filterPathsChecks).length > 0) {
+            gameOutput["currentlyhavingCheck"] = true
+        }
+        for (let i = 0; i < copyMatrix.length; i++) {
+            for (let j = 0; j < copyMatrix[i].length; j++) {
+                const pieceName = findPiece(copyMatrix[i][j])
+                const currRow = i
+                const currCol = j
+                if (pieceName.startsWith(whosTurn)) {
+                    let pathsOfPiece = findPosibilePosition(pieceName, currRow, currCol, copyMatrix, whosTurn)
+                    pathsOfPiece = possiblePathsFilter(pathsOfPiece, currRow, currCol, matrix)
+                    if (pathsOfPiece.length > 0) {
+                        gameOutput["otherPieceHaveMoves"] = true
+                        return gameOutput
+                    }
+                    else {
+                        gameOutput["otherPieceHaveMoves"] = false
+                        continue;
+                    }
+                }
+            }
+        }
+        return gameOutput
+    }
+    const kingsName = whosTurn === "white" ? "white-king" : "black-king"
+    const kingPosition = kingsName === "white-king" ? kingPositions.whiteKing : kingPositions.blackKing
+    let kingsPossibleMoves = findPosibilePosition(kingsName, kingPosition[0], kingPosition[1], matrix, whosTurn)
+    kingsPossibleMoves = possiblePathUpdation(kingsPossibleMoves, kingPosition[0], kingPosition[1])
+    console.log("kingsPossibleMoves", kingsPossibleMoves)
+    if (kingsPossibleMoves.length == 0) {
+        const currGameSituation = findGameEnd(whosTurn, matrix)
+        console.log("currGameSituation", currGameSituation)
+        if (currGameSituation?.currentlyhavingCheck == true && !currGameSituation?.otherPieceHaveMoves) {
+            setCheckMate((prevVal) => ({
+                ...prevVal,
+                isGameOver: true,
+                winMessage: whosTurn === "black" ? "White wins the Game" : "Black wins the Game",
+                status: "check Mate"
+            }));
+        }
+        else if (currGameSituation?.currentlyhavingCheck == false && !currGameSituation?.otherPieceHaveMoves) {
+            setCheckMate((prevVal) => ({
+                ...prevVal,
+                isGameOver: true,
+                winMessage: "Game draw",
+                status: "stale Mate"
+            }));
+        }
+    }
 }

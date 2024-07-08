@@ -6,6 +6,7 @@ import {
   findGameEnds,
 } from "../../utils/helper";
 import "./board.css";
+import Modal from "../pawnUpdation/modal";
 function board() {
   const [referenceVal, setReferenceVal] = useState<number[][]>([]);
   const [piece, setPiece] = useState<number[]>([]);
@@ -34,7 +35,23 @@ function board() {
     winMessage: "",
     status: "",
   });
-
+  const [isModalVisible, setIsModalVisible] = useState<{
+    isOpen: boolean;
+    whosTurn: string;
+    path: number[];
+  }>({
+    isOpen: false,
+    whosTurn: "",
+    path: [],
+  });
+  const handlePieceUpdate = (piece: string) => {
+    setIsModalVisible({
+      ...isModalVisible,
+      isOpen: false,
+    });
+    if (isModalVisible.path.length > 0)
+      matrix[isModalVisible.path[0]][isModalVisible.path[1]] = piece;
+  };
   useEffect(() => {
     if (checkMate.isGameOver === false) {
       findGameEnds(whosTurn, kingPositions, matrix, setCheckMate);
@@ -52,6 +69,12 @@ function board() {
             <img key={index} src={element} alt={`Captured piece ${index}`} />
           ))}
         </div>
+        {isModalVisible.isOpen && whosTurn == "black" && (
+          <Modal
+            value={isModalVisible.whosTurn}
+            onPieceSelect={handlePieceUpdate}
+          />
+        )}
       </div>
       <div className="board">
         {Array.from({ length: 8 }).map((_, rowIndex) => {
@@ -94,7 +117,8 @@ function board() {
                         setReferenceVal,
                         whosTurn,
                         setTakeDown,
-                        kingPositions
+                        kingPositions,
+                        setIsModalVisible
                       );
                       updateBoard(
                         row,
@@ -109,7 +133,9 @@ function board() {
                         sethightlightValue,
                         setTakeDown,
                         setCapturedPieces,
-                        setKingPositions
+                        setKingPositions,
+                        isModalVisible,
+                        setIsModalVisible
                       );
                     }}
                   >
@@ -130,6 +156,12 @@ function board() {
             <img key={index} src={element} alt={`Captured piece ${index}`} />
           ))}
         </div>
+        {isModalVisible.isOpen && whosTurn == "white" && (
+          <Modal
+            value={isModalVisible.whosTurn}
+            onPieceSelect={handlePieceUpdate}
+          />
+        )}
       </div>
     </>
   );

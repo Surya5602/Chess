@@ -45,7 +45,7 @@ export const imageMatrix = [
     ],
 ]
 
-export function updatePathInBoard(row: number, col: number, matrix: string[][], setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, kingPositions: { [key: string]: number[]; }) {
+export function updatePathInBoard(row: number, col: number, matrix: string[][], setPiece: React.Dispatch<React.SetStateAction<number[]>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, whosTurn: string, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, kingPositions: { [key: string]: number[]; }, setIsModalVisible: React.Dispatch<React.SetStateAction<{ isOpen: boolean; whosTurn: string; path: number[]; }>>) {
     const extractedPieceName = findPiece(matrix[row][col])
     setTakeDown((prevVal) => {
         prevVal = []
@@ -55,6 +55,11 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
         prevVal = []
         return prevVal;
     })
+    setIsModalVisible((prevVal) => ({
+        ...prevVal,
+        isOpen: false,
+        whosTurn: whosTurn
+    }))
 
     const possiblePathUpdation = ((possibelPathArray: number[][]) => {
         possibelPathArray = possibelPathArray.filter((path) => {
@@ -104,7 +109,7 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
     }
 }
 
-export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>, setKingPositions: React.Dispatch<React.SetStateAction<{ [key: string]: number[]; }>>) {
+export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>, setKingPositions: React.Dispatch<React.SetStateAction<{ [key: string]: number[]; }>>, isModalVisible: { isOpen: boolean; whosTurn: string; path: number[]; }, setIsModalVisible: React.Dispatch<React.SetStateAction<{ isOpen: boolean;whosTurn: string; path: number[]; }>>) {
     const updatePieces = () => {
         // Changing of kings positions after the change of the kings piece
         const updatingPieceName = findPiece(matrix[piece[0]][piece[1]])
@@ -120,6 +125,23 @@ export function updateBoard(row: number, col: number, matrix: string[][], setMat
         }
         matrix[row][col] = matrix[piece[0]][piece[1]]
         matrix[piece[0]][piece[1]] = ""
+        const pieceName: string = findPiece(matrix[row][col])
+        if (pieceName === "white-pawn" && row == 0) {
+            setIsModalVisible((prevVal) => ({
+                ...prevVal,
+                isOpen: true,
+                whosTurn: whosTurn,
+                path: [row, col]
+            }))
+        }
+        else if (pieceName === "black-pawn" && row == 7) {
+            setIsModalVisible((prevVal) => ({
+                ...prevVal,
+                isOpen: true,
+                whosTurn: whosTurn,
+                path: [row, col]
+            }))
+        }
         if (whosTurn == "white") {
             setWhosTurn("black");
         }
@@ -251,8 +273,8 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, matri
                 possiblePaths.push(firstBlackPossible)
             }
             // pawn moves when they have possible move to capture piece
-            if (matrix[row + 1][col - 1] != "") handleMove(row + 1, col - 1, "blackPawnLeftCapture")
-            if (matrix[row + 1][col + 1] != "") handleMove(row + 1, col + 1, "blackPawnRightCapture")
+            if (isValidMove(row + 1, col - 1) && matrix[row + 1][col - 1] != "") handleMove(row + 1, col - 1, "blackPawnLeftCapture")
+            if (isValidMove(row + 1, col + 1) && matrix[row + 1][col + 1] != "") handleMove(row + 1, col + 1, "blackPawnRightCapture")
             break;
         case "white-pawn":
             if (row == 6) {
@@ -266,8 +288,8 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, matri
                 possiblePaths.push(firstWhitePossible)
             }
             // pawn moves when they have possible move to capture piece
-            if (matrix[row - 1][col - 1] != "") handleMove(row - 1, col - 1, "blackPawnLeftCapture")
-            if (matrix[row - 1][col + 1] != "") handleMove(row - 1, col + 1, "blackPawnRightCapture")
+            if (isValidMove(row - 1, col - 1) && matrix[row - 1][col - 1] != "") handleMove(row - 1, col - 1, "blackPawnLeftCapture")
+            if (isValidMove(row - 1, col + 1) && matrix[row - 1][col + 1] != "") handleMove(row - 1, col + 1, "blackPawnRightCapture")
             break;
         case "white-rook":
         case "black-rook":
@@ -603,7 +625,7 @@ const checkPathsofKingsCheck = (matrix: string[][], kingPositions: number[], che
     return tempCheckPath
 }
 
-export const findGameEnds = (whosTurn: string, kingPositions: { [key: string]: number[]; }, matrix: string[][],setCheckMate: React.Dispatch<React.SetStateAction<{ isGameOver: boolean; winMessage: string; status: string; }>>) => {
+export const findGameEnds = (whosTurn: string, kingPositions: { [key: string]: number[]; }, matrix: string[][], setCheckMate: React.Dispatch<React.SetStateAction<{ isGameOver: boolean; winMessage: string; status: string; }>>) => {
     const possiblePathUpdation = ((possibelPathArray: number[][], row: number, col: number) => {
         possibelPathArray = possibelPathArray.filter((path) => {
             const copyMatrix: string[][] = JSON.parse(JSON.stringify(matrix))
@@ -671,10 +693,8 @@ export const findGameEnds = (whosTurn: string, kingPositions: { [key: string]: n
     const kingPosition = kingsName === "white-king" ? kingPositions.whiteKing : kingPositions.blackKing
     let kingsPossibleMoves = findPosibilePosition(kingsName, kingPosition[0], kingPosition[1], matrix, whosTurn)
     kingsPossibleMoves = possiblePathUpdation(kingsPossibleMoves, kingPosition[0], kingPosition[1])
-    console.log("kingsPossibleMoves", kingsPossibleMoves)
     if (kingsPossibleMoves.length == 0) {
         const currGameSituation = findGameEnd(whosTurn, matrix)
-        console.log("currGameSituation", currGameSituation)
         if (currGameSituation?.currentlyhavingCheck == true && !currGameSituation?.otherPieceHaveMoves) {
             setCheckMate((prevVal) => ({
                 ...prevVal,

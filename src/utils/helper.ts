@@ -726,11 +726,13 @@ export const findGameEnds = (whosTurn: string, kingPositions: { [key: string]: n
         return possibelPathArray
     })
     const possiblePathsFilter = ((possibelPathArray: number[][], currRow: number, currCol: number, matrix: string[][]) => {
-        const tempMatrix = JSON.parse(JSON.stringify(matrix))
-        const checkingPieceName = findPiece(tempMatrix[currRow][currCol])
-        possibelPathArray = possibelPathArray.filter(() => {
+        possibelPathArray = possibelPathArray.filter((path) => {
+            const tempMatrix = JSON.parse(JSON.stringify(matrix))
+            const checkingPieceName = findPiece(tempMatrix[currRow][currCol])
+            tempMatrix[path[0]][path[1]] = tempMatrix[currRow][currCol]
+            tempMatrix[currRow][currCol] = ''
             if (!checkingPieceName.includes("king")) {
-                const filterPathsChecks = whosTurn == "white" ? checkPathsofKingsCheck(tempMatrix, kingPositions["whiteKing"], "black") : checkPathsofKingsCheck(tempMatrix, kingPositions["blackKing"], "white")
+                const filterPathsChecks = whosTurn == "white" ? checkPathsofKingsCheck(tempMatrix, kingPositions["whiteKing"], "black") : checkPathsofKingsCheck(tempMatrix,  kingPositions["blackKing"], "white")
                 return Object.keys(filterPathsChecks).length == 0
             }
         })

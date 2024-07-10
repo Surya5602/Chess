@@ -1,3 +1,4 @@
+let threefoldRepetition: number[][] = []
 export const imageMatrix = [
     [
         "https://images.chesscomfiles.com/chess-themes/pieces/neo/150/br.png",
@@ -109,8 +110,88 @@ export function updatePathInBoard(row: number, col: number, matrix: string[][], 
     }
 }
 
-export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>, setKingPositions: React.Dispatch<React.SetStateAction<{ [key: string]: number[]; }>>, isModalVisible: { isOpen: boolean; whosTurn: string; path: number[]; }, setIsModalVisible: React.Dispatch<React.SetStateAction<{ isOpen: boolean;whosTurn: string; path: number[]; }>>) {
+export function updateBoard(row: number, col: number, matrix: string[][], setMatrix: React.Dispatch<React.SetStateAction<string[][]>>, setReferenceVal: React.Dispatch<React.SetStateAction<number[][]>>, referenceVal: number[][], piece: number[], whosTurn: string, setWhosTurn: React.Dispatch<React.SetStateAction<string>>, sethightlightValue: React.Dispatch<React.SetStateAction<number[][]>>, setTakeDown: React.Dispatch<React.SetStateAction<number[][]>>, capturedPieces: { [key: string]: string[]; }, setCapturedPieces: React.Dispatch<React.SetStateAction<{ [key: string]: string[]; }>>, setKingPositions: React.Dispatch<React.SetStateAction<{ [key: string]: number[]; }>>, setIsModalVisible: React.Dispatch<React.SetStateAction<{ isOpen: boolean; whosTurn: string; path: number[]; }>>, setCheckMate: React.Dispatch<React.SetStateAction<{ isGameOver: boolean; winMessage: string; status: string; }>>) {
+    const checkThreeFold = (threefoldRepetition: number[][]) => {
+        function pushValuesForThreefoldrep(fromRow: number, fromCol: number, toRow: number, toCol: number) {
+            threefoldRepetition.push([fromRow, fromCol, toRow, toCol])
+        }
+        if (threefoldRepetition.length === 0 || threefoldRepetition.length === 1) {
+            pushValuesForThreefoldrep(piece[0], piece[1], row, col)
+        } else if (threefoldRepetition.length === 2 && (threefoldRepetition[0][2] == piece[0] && threefoldRepetition[0][3] == piece[1]) && (threefoldRepetition[0][0] == row && threefoldRepetition[0][1] == col)) {
+            pushValuesForThreefoldrep(piece[0], piece[1], row, col)
+        } else if (threefoldRepetition.length === 3 && (threefoldRepetition[1][2] == piece[0] && threefoldRepetition[1][3] == piece[1]) && (threefoldRepetition[1][0] == row && threefoldRepetition[1][1] == col)) {
+            pushValuesForThreefoldrep(piece[0], piece[1], row, col)
+        } else if (threefoldRepetition.length === 4 && (threefoldRepetition[0][0] == piece[0] && threefoldRepetition[0][1] == piece[1]) && (threefoldRepetition[0][2] == row && threefoldRepetition[0][3] == col)) {
+            pushValuesForThreefoldrep(piece[0], piece[1], row, col)
+        }
+        else if (threefoldRepetition.length === 5 && (threefoldRepetition[1][0] == piece[0] && threefoldRepetition[1][1] == piece[1]) && (threefoldRepetition[1][2] == row && threefoldRepetition[1][3] == col)) {
+            setCheckMate((prevVal) => ({
+                ...prevVal,
+                isGameOver: true,
+                winMessage: "Game draw",
+                status: "Three fold Repitation"
+            }));
+            threefoldRepetition = []
+        }
+        else {
+            threefoldRepetition = []
+        }
+
+    }
+    const checkEnoughPiece = (capturedPieces: { [key: string]: string[]; }) => {
+        const currTeam: string[] = whosTurn === "white" ? ["white" , "whitePieces"] : ["black" , "blackPieces"]
+        const oppTeam: string[] = whosTurn === "white" ? ["black" , "blackPieces"] : ["white" , "whitePieces"]
+        if (capturedPieces && capturedPieces[currTeam[1]].length < 14 && capturedPieces[oppTeam[1]].length < 14){
+            return
+        }
+        else{
+            const copyMatrix = matrix
+            const piecesInBoard: {[key:string]: string[]} = {whitePieces: [] ,blackPieces: []}
+            copyMatrix.forEach((rows)=>{
+                rows.forEach((pieces)=>{
+                const pieceName = findPiece(pieces)
+                   if (pieceName !== "chess-coin"){
+                        if (pieceName.includes("white")){
+                            piecesInBoard.whitePieces.push(pieceName)
+                        }else{
+                            piecesInBoard.blackPieces.push(pieceName)
+                        }
+                   }
+                        
+                })
+            })
+            const checkGameEnd: {[key:string]: boolean[]} = {whitePieces: [] ,blackPieces: []}
+            Object.keys(piecesInBoard).forEach((key)=>{
+               piecesInBoard[key].forEach((pieceName)=>{
+                    if(!(pieceName.includes("queen") || pieceName.includes("rook") || pieceName.includes("pawn"))){
+                        checkGameEnd[key].push(true)
+                    }else{
+                        return checkGameEnd[key].push(false)
+                    }
+               })
+            })
+            let gameNotEnd: boolean = true
+            Object.keys(checkGameEnd).forEach((key)=>{
+                checkGameEnd[key].forEach((bool)=>{
+                    if(bool === false)
+                    {
+                        gameNotEnd = false
+                    }
+                })
+            })
+            if (gameNotEnd){
+                setCheckMate((prevVal) => ({
+                    ...prevVal,
+                    isGameOver: true,
+                    winMessage: "Game draw",
+                    status: "Insufficient Material"
+                }));
+            }
+        }
+
+    }
     const updatePieces = () => {
+        checkThreeFold(threefoldRepetition);
         // Changing of kings positions after the change of the kings piece
         const updatingPieceName = findPiece(matrix[piece[0]][piece[1]])
         if (updatingPieceName.includes("white-king")) {
@@ -160,6 +241,7 @@ export function updateBoard(row: number, col: number, matrix: string[][], setMat
             prevVal = []
             return prevVal
         })
+        checkEnoughPiece(capturedPieces)
     }
     if (referenceVal) {
         referenceVal.map((move) => {

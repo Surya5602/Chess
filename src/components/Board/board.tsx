@@ -132,10 +132,11 @@ function board() {
                         setWhosTurn,
                         sethightlightValue,
                         setTakeDown,
+                        capturedPieces,
                         setCapturedPieces,
                         setKingPositions,
-                        isModalVisible,
-                        setIsModalVisible
+                        setIsModalVisible,
+                        setCheckMate
                       );
                     }}
                   >

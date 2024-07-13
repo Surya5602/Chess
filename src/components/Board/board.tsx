@@ -44,6 +44,7 @@ function board() {
     whosTurn: "",
     path: [],
   });
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const handlePieceUpdate = (piece: string) => {
     setIsModalVisible({
       ...isModalVisible,
@@ -56,113 +57,124 @@ function board() {
     if (checkMate.isGameOver === false) {
       findGameEnds(whosTurn, kingPositions, matrix, setCheckMate);
     } else {
-      window.alert(checkMate.winMessage);
+      setIsGameOver((prevVal) => {
+        prevVal = true;
+        return prevVal;
+      });
     }
   }, [whosTurn, checkMate]);
-
   return (
     <>
-      <div className="Player blackPlayer">
-        <p>Player 1</p>
-        <div className="capturedPieces">
-          {capturedPieces["whitePieces"].map((element, index) => (
-            <img key={index} src={element} alt={`Captured piece ${index}`} />
-          ))}
+      {isGameOver && (
+        <div className="game-over">
+          <div className="header">Game Over</div>
+          <div className="winner">Winner: {checkMate.winMessage}</div>
+          <div className="status">Status: {checkMate.status}</div>
         </div>
-        {isModalVisible.isOpen && whosTurn == "black" && (
-          <Modal
-            value={isModalVisible.whosTurn}
-            onPieceSelect={handlePieceUpdate}
-          />
-        )}
-      </div>
-      <div className="board">
-        {Array.from({ length: 8 }).map((_, rowIndex) => {
-          const row: number = rowIndex;
-          return (
-            <div key={rowIndex} className={`row ${`row${rowIndex}`}`}>
-              {Array.from({ length: 8 }).map((_, colIndex) => {
-                const col: number = colIndex;
-                return (
-                  <div
-                    key={colIndex}
-                    className={`${
-                      (col + row) % 2 == 0 ? "yellowBox" : "greenBox"
-                    } ${
-                      hightlightValue.findIndex(
-                        (value) => value[0] == row && value[1] == col
-                      ) > -1
-                        ? "possibleMove"
-                        : ""
-                    } ${
-                      piece[0] == row &&
-                      piece[1] == col &&
-                      matrix[piece[0]][piece[1]]
-                        ? "clickedBox"
-                        : ""
-                    } ${
-                      takeDown.findIndex(
-                        (value) => value[0] == row && value[1] == col
-                      ) > -1
-                        ? "cuttingPiece"
-                        : ""
-                    }`}
-                    onClick={() => {
-                      updatePathInBoard(
-                        row,
-                        col,
-                        matrix,
-                        setPiece,
-                        sethightlightValue,
-                        setReferenceVal,
-                        whosTurn,
-                        setTakeDown,
-                        kingPositions,
-                        setIsModalVisible
-                      );
-                      updateBoard(
-                        row,
-                        col,
-                        JSON.parse(JSON.stringify(matrix)),
-                        setMatrix,
-                        setReferenceVal,
-                        referenceVal,
-                        piece,
-                        whosTurn,
-                        setWhosTurn,
-                        sethightlightValue,
-                        setTakeDown,
-                        capturedPieces,
-                        setCapturedPieces,
-                        setKingPositions,
-                        setIsModalVisible,
-                        setCheckMate
-                      );
-                    }}
-                  >
-                    {matrix[row][col] && (
-                      <img src={matrix[row][col]} alt="pieces" />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
-      <div className="Player blackPlayer">
-        <p>Player 2</p>
-        <div className="capturedPieces">
-          {capturedPieces["blackPieces"].map((element, index) => (
-            <img key={index} src={element} alt={`Captured piece ${index}`} />
-          ))}
+      )}
+      <div className={`${isGameOver && "blurryEffectComponent"}`}>
+        <div className={`Player blackPlayer`}>
+          <p>Player 1</p>
+          <div className="capturedPieces">
+            {capturedPieces["whitePieces"].map((element, index) => (
+              <img key={index} src={element} alt={`Captured piece ${index}`} />
+            ))}
+          </div>
+          {isModalVisible.isOpen && whosTurn == "black" && (
+            <Modal
+              value={isModalVisible.whosTurn}
+              onPieceSelect={handlePieceUpdate}
+            />
+          )}
         </div>
-        {isModalVisible.isOpen && whosTurn == "white" && (
-          <Modal
-            value={isModalVisible.whosTurn}
-            onPieceSelect={handlePieceUpdate}
-          />
-        )}
+        <div className="board">
+          {Array.from({ length: 8 }).map((_, rowIndex) => {
+            const row: number = rowIndex;
+            return (
+              <div key={rowIndex} className={`row ${`row${rowIndex}`}`}>
+                {Array.from({ length: 8 }).map((_, colIndex) => {
+                  const col: number = colIndex;
+                  return (
+                    <div
+                      key={colIndex}
+                      className={`${
+                        (col + row) % 2 == 0 ? "yellowBox" : "greenBox"
+                      } ${
+                        hightlightValue.findIndex(
+                          (value) => value[0] == row && value[1] == col
+                        ) > -1
+                          ? "possibleMove"
+                          : ""
+                      } ${
+                        piece[0] == row &&
+                        piece[1] == col &&
+                        matrix[piece[0]][piece[1]]
+                          ? "clickedBox"
+                          : ""
+                      } ${
+                        takeDown.findIndex(
+                          (value) => value[0] == row && value[1] == col
+                        ) > -1
+                          ? "cuttingPiece"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        updatePathInBoard(
+                          row,
+                          col,
+                          matrix,
+                          setPiece,
+                          sethightlightValue,
+                          setReferenceVal,
+                          whosTurn,
+                          setTakeDown,
+                          kingPositions,
+                          setIsModalVisible
+                        );
+                        updateBoard(
+                          row,
+                          col,
+                          JSON.parse(JSON.stringify(matrix)),
+                          setMatrix,
+                          setReferenceVal,
+                          referenceVal,
+                          piece,
+                          whosTurn,
+                          setWhosTurn,
+                          sethightlightValue,
+                          setTakeDown,
+                          capturedPieces,
+                          setCapturedPieces,
+                          setKingPositions,
+                          setIsModalVisible,
+                          setCheckMate
+                        );
+                      }}
+                    >
+                      {matrix[row][col] && (
+                        <img src={matrix[row][col]} alt="pieces" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+        <div className="Player blackPlayer">
+          <p>Player 2</p>
+          <div className="capturedPieces">
+            {capturedPieces["blackPieces"].map((element, index) => (
+              <img key={index} src={element} alt={`Captured piece ${index}`} />
+            ))}
+          </div>
+          {isModalVisible.isOpen && whosTurn == "white" && (
+            <Modal
+              value={isModalVisible.whosTurn}
+              onPieceSelect={handlePieceUpdate}
+            />
+          )}
+        </div>
       </div>
     </>
   );

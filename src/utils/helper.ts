@@ -1,4 +1,6 @@
 let threefoldRepetition: number[][] = []
+let whiteCastlingAvailable: boolean = true
+let blackCastlingAvailable: boolean = true
 export const imageMatrix = [
     [
         "https://images.chesscomfiles.com/chess-themes/pieces/neo/150/br.png",
@@ -139,47 +141,46 @@ export function updateBoard(row: number, col: number, matrix: string[][], setMat
 
     }
     const checkEnoughPiece = (capturedPieces: { [key: string]: string[]; }) => {
-        const currTeam: string[] = whosTurn === "white" ? ["white" , "whitePieces"] : ["black" , "blackPieces"]
-        const oppTeam: string[] = whosTurn === "white" ? ["black" , "blackPieces"] : ["white" , "whitePieces"]
-        if (capturedPieces && capturedPieces[currTeam[1]].length < 14 && capturedPieces[oppTeam[1]].length < 14){
+        const currTeam: string[] = whosTurn === "white" ? ["white", "whitePieces"] : ["black", "blackPieces"]
+        const oppTeam: string[] = whosTurn === "white" ? ["black", "blackPieces"] : ["white", "whitePieces"]
+        if (capturedPieces && capturedPieces[currTeam[1]].length < 14 && capturedPieces[oppTeam[1]].length < 14) {
             return
         }
-        else{
+        else {
             const copyMatrix = matrix
-            const piecesInBoard: {[key:string]: string[]} = {whitePieces: [] ,blackPieces: []}
-            copyMatrix.forEach((rows)=>{
-                rows.forEach((pieces)=>{
-                const pieceName = findPiece(pieces)
-                   if (pieceName !== "chess-coin"){
-                        if (pieceName.includes("white")){
+            const piecesInBoard: { [key: string]: string[] } = { whitePieces: [], blackPieces: [] }
+            copyMatrix.forEach((rows) => {
+                rows.forEach((pieces) => {
+                    const pieceName = findPiece(pieces)
+                    if (pieceName !== "chess-coin") {
+                        if (pieceName.includes("white")) {
                             piecesInBoard.whitePieces.push(pieceName)
-                        }else{
+                        } else {
                             piecesInBoard.blackPieces.push(pieceName)
                         }
-                   }
-                        
+                    }
+
                 })
             })
-            const checkGameEnd: {[key:string]: boolean[]} = {whitePieces: [] ,blackPieces: []}
-            Object.keys(piecesInBoard).forEach((key)=>{
-               piecesInBoard[key].forEach((pieceName)=>{
-                    if(!(pieceName.includes("queen") || pieceName.includes("rook") || pieceName.includes("pawn"))){
+            const checkGameEnd: { [key: string]: boolean[] } = { whitePieces: [], blackPieces: [] }
+            Object.keys(piecesInBoard).forEach((key) => {
+                piecesInBoard[key].forEach((pieceName) => {
+                    if (!(pieceName.includes("queen") || pieceName.includes("rook") || pieceName.includes("pawn"))) {
                         checkGameEnd[key].push(true)
-                    }else{
+                    } else {
                         return checkGameEnd[key].push(false)
                     }
-               })
+                })
             })
             let gameNotEnd: boolean = true
-            Object.keys(checkGameEnd).forEach((key)=>{
-                checkGameEnd[key].forEach((bool)=>{
-                    if(bool === false)
-                    {
+            Object.keys(checkGameEnd).forEach((key) => {
+                checkGameEnd[key].forEach((bool) => {
+                    if (bool === false) {
                         gameNotEnd = false
                     }
                 })
             })
-            if (gameNotEnd){
+            if (gameNotEnd) {
                 setCheckMate((prevVal) => ({
                     ...prevVal,
                     isGameOver: true,
@@ -188,24 +189,61 @@ export function updateBoard(row: number, col: number, matrix: string[][], setMat
                 }));
             }
         }
-
     }
     const updatePieces = () => {
         checkThreeFold(threefoldRepetition);
         // Changing of kings positions after the change of the kings piece
         const updatingPieceName = findPiece(matrix[piece[0]][piece[1]])
+        const theMoveIsACastilingMoveOfBlack = whosTurn === "black" && blackCastlingAvailable && updatingPieceName == "black-king" && (row == 0 && (col == 2 || col == 6))
+        const theMoveIsACastilingMoveOfWhite = whosTurn === "white" && whiteCastlingAvailable && updatingPieceName == "white-king" && (row == 7 && (col == 2 || col == 6))
+        if (updatingPieceName.includes("white-rook"))
+            whiteCastlingAvailable = false
+        if (updatingPieceName.includes("black-rook"))
+            blackCastlingAvailable = false
         if (updatingPieceName.includes("white-king")) {
+            whiteCastlingAvailable = false
             setKingPositions((prevVal) => {
                 return { ...prevVal, "whiteKing": [row, col] }
             })
         }
         else if (updatingPieceName.includes("black-king")) {
+            blackCastlingAvailable = false
             setKingPositions((prevVal) => {
                 return { ...prevVal, "blackKing": [row, col] }
             })
         }
-        matrix[row][col] = matrix[piece[0]][piece[1]]
-        matrix[piece[0]][piece[1]] = ""
+
+        if (theMoveIsACastilingMoveOfBlack) {
+            matrix[row][col] = matrix[piece[0]][piece[1]]
+            matrix[piece[0]][piece[1]] = ""
+            if (col == 2) {
+                matrix[0][3] = matrix[0][0]
+                matrix[0][0] = ""
+            }
+            else if (col == 6) {
+                matrix[0][5] = matrix[0][7]
+                matrix[0][7] = ""
+            }
+            blackCastlingAvailable = false
+
+        }
+        else if (theMoveIsACastilingMoveOfWhite) {
+            matrix[row][col] = matrix[piece[0]][piece[1]]
+            matrix[piece[0]][piece[1]] = ""
+            if (col == 2) {
+                matrix[7][3] = matrix[7][0]
+                matrix[7][0] = ""
+            }
+            else if (col == 6) {
+                matrix[7][5] = matrix[7][7]
+                matrix[7][7] = ""
+            }
+            whiteCastlingAvailable = false
+        }
+        else {
+            matrix[row][col] = matrix[piece[0]][piece[1]]
+            matrix[piece[0]][piece[1]] = ""
+        }
         const pieceName: string = findPiece(matrix[row][col])
         if (pieceName === "white-pawn" && row == 0) {
             setIsModalVisible((prevVal) => ({
@@ -466,6 +504,15 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, matri
             break;
         case "white-king":
         case "black-king":
+            const addCastlingMoves = () => {
+                const moves = [[0, 2], [0, -2]]
+                for (let i = 0; i < moves.length; i++) {
+                    const kingsPositionCheckWhetherEmpty = removePathsOfSameTeam(row + moves[i][0], col + moves[i][1], matrix, whosTurn)
+                    const rookSPositionCheckWhetherEmpty = removePathsOfSameTeam(row + moves[i][0], col + moves[i][1], matrix, whosTurn)
+                    if (kingsPositionCheckWhetherEmpty === "emptyCoin" && rookSPositionCheckWhetherEmpty === "emptyCoin")
+                        possiblePaths.push([row + moves[i][0], col + moves[i][1]])
+                }
+            }
             const kingMoveOffsets = [
                 [0, 1], [0, -1],
                 [1, 1], [-1, -1],
@@ -478,6 +525,9 @@ const findPosibilePosition = (pieceName: string, row: number, col: number, matri
                         possiblePaths.push([(row + rowOffset), col + colOffset]);
                 }
             }
+            const isCastlingAvalilable = pieceName === "white-king" ? whiteCastlingAvailable : blackCastlingAvailable
+            if (isCastlingAvalilable)
+                addCastlingMoves()
             break;
 
     }
@@ -732,7 +782,7 @@ export const findGameEnds = (whosTurn: string, kingPositions: { [key: string]: n
             tempMatrix[path[0]][path[1]] = tempMatrix[currRow][currCol]
             tempMatrix[currRow][currCol] = ''
             if (!checkingPieceName.includes("king")) {
-                const filterPathsChecks = whosTurn == "white" ? checkPathsofKingsCheck(tempMatrix, kingPositions["whiteKing"], "black") : checkPathsofKingsCheck(tempMatrix,  kingPositions["blackKing"], "white")
+                const filterPathsChecks = whosTurn == "white" ? checkPathsofKingsCheck(tempMatrix, kingPositions["whiteKing"], "black") : checkPathsofKingsCheck(tempMatrix, kingPositions["blackKing"], "white")
                 return Object.keys(filterPathsChecks).length == 0
             }
         })
@@ -783,8 +833,8 @@ export const findGameEnds = (whosTurn: string, kingPositions: { [key: string]: n
             setCheckMate((prevVal) => ({
                 ...prevVal,
                 isGameOver: true,
-                winMessage: whosTurn === "black" ? "White wins the Game" : "Black wins the Game",
-                status: "check Mate"
+                winMessage: whosTurn === "black" ? "White" : "Black",
+                status: "Check Mate"
             }));
         }
         else if (currGameSituation?.currentlyhavingCheck == false && !currGameSituation?.otherPieceHaveMoves) {
@@ -792,7 +842,7 @@ export const findGameEnds = (whosTurn: string, kingPositions: { [key: string]: n
                 ...prevVal,
                 isGameOver: true,
                 winMessage: "Game draw",
-                status: "stale Mate"
+                status: "Stale Mate"
             }));
         }
     }

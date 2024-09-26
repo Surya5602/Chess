@@ -40,7 +40,7 @@ export const imageMatrix = [
         "https://res.cloudinary.com/dqvb4pnky/image/upload/v1721026834/wr.png",
         "https://res.cloudinary.com/dqvb4pnky/image/upload/v1721026840/wn.png",
         "https://res.cloudinary.com/dqvb4pnky/image/upload/v1721026845/wb.png",
-        "https://res.cloudinary.com/dqvb4pnky/image/upload/v1721026845/wb.png",
+        "https://res.cloudinary.com/dqvb4pnky/image/upload/v1721026845/wq.png",
         "https://res.cloudinary.com/dqvb4pnky/image/upload/v1721026860/wk.png",
         "https://res.cloudinary.com/dqvb4pnky/image/upload/v1721026845/wb.png",
         "https://res.cloudinary.com/dqvb4pnky/image/upload/v1721026840/wn.png",
